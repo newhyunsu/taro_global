@@ -1,122 +1,156 @@
+import 'dart:async';
+
+import 'package:taro/common/apiservice/apiservice.dart';
+// import 'package:taro/common/database/app_database.dart';
+import 'package:taro/common/util/app_storage.dart';
+import 'package:taro/common/util/applogger.dart';
+import 'package:taro/common/util/device_manager.dart';
+import 'package:taro/common/util/intent_handler.dart';
+import 'package:taro/firebase_options.dart';
+import 'package:taro/router/go_router.dart';
+import 'package:taro/screen/main/main_screen.dart';
+import 'package:taro/splash/splash_screen.dart';
+import 'package:app_links/app_links.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:toastification/toastification.dart';
 
-void main() {
-  runApp(const MyApp());
+final appStorageProvider = Provider<AppStorage>((ref) {
+  return AppStorage();
+});
+// final appDatabaseProvider = Provider<AppDatabase>((ref) {
+//   return AppDatabase();
+// });
+final apiService = Provider<ApiService>((ref) {
+  return ApiService();
+});
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // MobileAds.instance.initialize();
+  AppStorage.checkIfFirstInstallAndClearSecureData();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  DeviceManager.registerToServer()
+      .then((push) {
+        AppLogger.i("✅ Device 등록 완료: ${push?.message}");
+      })
+      .catchError((e) {
+        AppLogger.i("❌ 등록 중 에러: $e");
+      });
+  runApp(
+    ProviderScope(
+      // overrides: [appStorageProvider, appDatabaseProvider, apiService],
+      overrides: [appStorageProvider, apiService],
+      child: const App(),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class App extends ConsumerStatefulWidget {
+  const App({super.key});
 
+  @override
+  ConsumerState<App> createState() => _AppState();
+}
+
+class _AppState extends ConsumerState<App> {
   // This widget is the root of your application.
+  StreamSubscription<Uri>? _sub;
+  late final AppLinks _appLinks;
+
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
+  void initState() {
+    super.initState();
+    _initDeepLinkListener();
+    _checkInitialMessage();
+    _initTheme();
   }
-}
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  Future<void> _initDeepLinkListener() async {
+    try {
+      _appLinks = AppLinks();
+      await Future.delayed(const Duration(milliseconds: 300));
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
+      _sub = _appLinks.uriLinkStream.listen(
+        (Uri uri) {
+          AppLogger.i('딥링크 수신: $uri');
+          IntentHandler.handleUri(uri, ref);
+        },
+        onError: (err) {
+          debugPrint('Deep link error: $err');
+        },
+      );
+    } catch (e) {
+      debugPrint('Failed to init deep link: $e');
+    }
 
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      final deeplink = message.data['deeplink'];
+      if (deeplink != null) {
+        AppLogger.i('Push 딥링크: $deeplink');
+        IntentHandler.handleUri(Uri.parse(deeplink), ref);
+      }
     });
   }
 
+  Future<void> _initTheme() async {
+    final brightness =
+        WidgetsBinding.instance.platformDispatcher.platformBrightness;
+    final isDarkMode = brightness == Brightness.dark;
+
+    final themePrefix = isDarkMode ? 'dark' : 'light';
+    AppLogger.i('현재 테마: $themePrefix 모드');
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _checkInitialMessage() async {
+    final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+    if (initialMessage != null) {
+      final deeplink = initialMessage.data['deeplink'];
+      if (deeplink != null) {
+        AppLogger.i('초기 딥링크: $deeplink');
+        IntentHandler.handleUri(Uri.parse(deeplink), ref);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+    return ToastificationWrapper(
+      child: MaterialApp.router(
+        theme: ThemeData(
+          useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black,
+          ),
         ),
+        darkTheme: ThemeData(
+          useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.teal,
+            brightness: Brightness.dark,
+          ),
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.black,
+            foregroundColor: Colors.white,
+          ),
+        ),
+        themeMode: ThemeMode.light,
+        routerConfig: goRouter,
+        builder: (context, child) {
+          return SplashScreen(child: child);
+        },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
