@@ -4,18 +4,17 @@ import 'package:taro/common/apiservice/apiservice.dart';
 // import 'package:taro/common/database/app_database.dart';
 import 'package:taro/common/util/app_storage.dart';
 import 'package:taro/common/util/applogger.dart';
+import 'package:taro/common/util/const.dart';
 import 'package:taro/common/util/device_manager.dart';
 import 'package:taro/common/util/intent_handler.dart';
 import 'package:taro/firebase_options.dart';
 import 'package:taro/router/go_router.dart';
-import 'package:taro/screen/main/main_screen.dart';
 import 'package:taro/splash/splash_screen.dart';
 import 'package:app_links/app_links.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:toastification/toastification.dart';
 
 final appStorageProvider = Provider<AppStorage>((ref) {
@@ -129,6 +128,7 @@ class _AppState extends ConsumerState<App> {
         theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+          scaffoldBackgroundColor: kPrimaryColor,
           appBarTheme: const AppBarTheme(
             backgroundColor: Colors.white,
             foregroundColor: Colors.black,
@@ -140,6 +140,7 @@ class _AppState extends ConsumerState<App> {
             seedColor: Colors.teal,
             brightness: Brightness.dark,
           ),
+          scaffoldBackgroundColor: kPrimaryColor,
           appBarTheme: const AppBarTheme(
             backgroundColor: Colors.black,
             foregroundColor: Colors.white,

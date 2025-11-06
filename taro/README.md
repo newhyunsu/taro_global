@@ -17,3 +17,7 @@ samples, guidance on mobile development, and a full API reference.
 
 디자인 툴은 스위치를 사용해보자 
 https://stitch.withgoogle.com/?pli=1
+
+
+색상은 이렇게 가보자 
+다크 네이비 (#0A0E2A, #101828)

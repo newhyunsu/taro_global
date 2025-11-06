@@ -132,20 +132,21 @@ class _MainTabbarWidgetState extends ConsumerState<MainTabbarWidget>
             (i) => Offstage(
               offstage: selectedIndex != i,
               child: Padding(
-                padding: const EdgeInsets.only(bottom: 50), // 배너 광고 높이만큼 패딩
+                // padding: const EdgeInsets.only(bottom: 50), // 배너 광고 높이만큼 패딩
+                padding: EdgeInsets.zero,
                 child: Center(child: _screens[i]),
               ),
             ),
           ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: BannerAdWidget(
-              key: _bannerKey, // ValueKey 대신 GlobalKey 사용
-              inventory: AdInventories.mainBanner,
-            ),
-          ),
+          // Positioned(
+          //   bottom: 0,
+          //   left: 0,
+          //   right: 0,
+          //   child: BannerAdWidget(
+          //     key: _bannerKey, // ValueKey 대신 GlobalKey 사용
+          //     inventory: AdInventories.mainBanner,
+          //   ),
+          // ),
         ],
       ),
       bottomNavigationBar: MainBottomNavigationBar(onItemTapped: _onItemTapped),

@@ -1,13 +1,12 @@
 import 'dart:io';
 
 import 'package:taro/common/advertising/model/adinventory.dart';
-import 'package:taro/common/apiservice/apiservice.dart';
 import 'package:taro/common/util/app_storage.dart';
 import 'package:taro/common/util/applogger.dart';
-import 'package:taro/common/util/common_popup_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:taro/common/util/const.dart';
 
 class BannerAdWidget extends StatefulWidget {
   const BannerAdWidget({super.key, required this.inventory});
@@ -154,7 +153,7 @@ class BannerAdWidgetState extends State<BannerAdWidget> {
         ? Container(
             height: _bannerAd!.size.height.toDouble(),
             width: double.infinity, // 전체 너비 사용
-            color: Colors.white, // 배경색 설정
+            color: kPrimaryColor, // 배경색 설정
             child: Stack(
               children: [
                 Center(

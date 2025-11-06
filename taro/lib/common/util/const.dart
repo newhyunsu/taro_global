@@ -17,7 +17,7 @@ const String kBaseUrl = 'https://mogllotto.vercel.app/api';
 화이트/실버 (#F5F5F5, #C0C0C0) → 텍스트 가독성, 보조 라인
 에메랄드 그린 (#2ECC71) → “당첨” 버튼 강조용
 */
-Color kPrimaryColor = '#EAF6FF'.toColor();
+Color kPrimaryColor = '#101828'.toColor();
 Color kSecondaryColor = '#FFD93D'.toColor();
 
 extension ColorExtension on String {
