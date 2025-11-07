@@ -3,6 +3,7 @@ import 'package:taro/common/advertising/google_admob_banner.dart';
 import 'package:taro/common/util/applogger.dart';
 import 'package:taro/common/webview/webview_widget.dart';
 import 'package:taro/router/go_router.dart';
+import 'package:taro/screen/home/home_widget.dart';
 import 'package:taro/screen/main/components/main_bottom_navigation_bar.dart';
 import 'package:taro/screen/main/providers/main_tab_provider.dart';
 import 'package:app_badge_plus/app_badge_plus.dart';
@@ -10,6 +11,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:taro/screen/spread/spread_screen.dart';
 
 class MainTabbarWidget extends ConsumerStatefulWidget {
   const MainTabbarWidget({super.key});
@@ -28,6 +30,8 @@ class _MainTabbarWidgetState extends ConsumerState<MainTabbarWidget>
       GlobalKey<BannerAdWidgetState>();
 
   late final List<Widget> _screens = <Widget>[
+    HomeWidget(),
+    SpreadScreen(),
     BaseWebview(
       key: _webviewKey, // 여기서 키 사용
       initialUrl: "https://naver.com",

@@ -1,5 +1,6 @@
 import 'package:taro/common/util/app_storage.dart';
 import 'package:taro/common/util/applogger.dart';
+import 'package:taro/common/util/const.dart';
 import 'package:taro/main.dart';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:flutter/material.dart';
@@ -102,7 +103,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             duration: const Duration(milliseconds: 210),
             opacity: _isFadingOut ? 0.0 : 1.0,
             child: Scaffold(
-              backgroundColor: const Color(0xFFDFF6FF),
+              backgroundColor: kPrimaryColor,
               body: Center(
                 child: AnimatedBuilder(
                   animation: _controller,
@@ -118,7 +119,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                               style: const TextStyle(
                                 fontSize: 50.0,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black,
+                                color: Colors.white,
                               ),
                               child: SizedBox(
                                 width: 250,
