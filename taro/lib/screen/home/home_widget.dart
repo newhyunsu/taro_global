@@ -1,7 +1,8 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:taro/common/util/const.dart';
+import 'package:taro/screen/home/widget/magic_light.dart';
+import 'package:taro/screen/home/widget/spread_select_screen.dart';
 
 class HomeWidget extends StatefulWidget {
   const HomeWidget({super.key});
@@ -50,7 +51,7 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
     final screenSize = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: kPrimaryColor,
+      backgroundColor: const Color(0xFF1A0B2E), // 다크 퍼플 배경
       body: SafeArea(
         child: Stack(
           children: [
@@ -60,7 +61,7 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
               builder: (context, child) {
                 return CustomPaint(
                   size: screenSize,
-                  painter: _MagicLightPainter(
+                  painter: MagicLightPainter(
                     animationX: _magicAnimationX.value,
                     animationY: _magicAnimationY.value,
                     screenWidth: screenSize.width,
@@ -74,110 +75,56 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 40),
-                    // 앱 아이콘
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF6B46C1), // 다크 퍼플
-                        shape: BoxShape.circle,
-                      ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Positioned(
-                            left: 20,
-                            top: 25,
-                            child: Icon(
-                              Icons.auto_awesome,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                          ),
-                          Positioned(
-                            right: 20,
-                            bottom: 25,
-                            child: Icon(
-                              Icons.auto_awesome,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                     const SizedBox(height: 20),
-                    // 앱 제목
+                    // 헤더: 로고 + 앱 이름
+                    Row(
+                      children: [
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFFE91E63), Color(0xFF9C27B0)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.auto_awesome,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'MysticArcade',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    // 메인 질문
                     const Text(
-                      '운세? 어차피 될놈만 된다.',
+                      "What's on your mind today?",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    // 환영 메시지
-                    const Text(
-                      '그래도 너가 될놈인지 아닌지 모르니까?',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    const SizedBox(height: 12),
-                    // 오늘의 운세
-                    const Text(
-                      '한번 보고 가라',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    const SizedBox(height: 40),
-                    // 메인 네비게이션 버튼
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildNavButton(
-                          icon: Icons.style_outlined,
-                          label: '타로 보기',
-                          onTap: () {
-                            // 타로 보기 기능
-                          },
-                        ),
-                        _buildNavButton(
-                          icon: Icons.menu_book_outlined,
-                          label: '나의 타로',
-                          onTap: () {
-                            // 나의 타로 기능
-                          },
-                        ),
-                        _buildNavButton(
-                          icon: Icons.settings_outlined,
-                          label: '설정',
-                          onTap: () {
-                            // 설정 기능
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 60),
-                    // 최근 본 타로 섹션
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: const Text(
-                        '최근 본 타로',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // 최근 타로 카드
-                    _buildRecentTarotCard(
-                      title: '연애운 스프레드',
-                      description: '새로운 만남의 가능성이 열려있습니다.',
-                    ),
+                    const SizedBox(height: 24),
+                    // Pull of the Day 큰 카드
+                    _buildPullOfTheDayCard(context),
+                    const SizedBox(height: 24),
+                    // 카테고리 그리드
+                    _buildCategoryGrid(context),
                     const SizedBox(height: 40),
                   ],
                 ),
@@ -189,183 +136,270 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildNavButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 20),
+  Widget _buildPullOfTheDayCard(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF2D1B4E), // 약간 밝은 다크 퍼플
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        children: [
+          // 이미지 영역 (상단)
+          Container(
+            height: 220,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.2),
-                width: 1,
+              color: const Color(0xFF0D4A3A), // 다크 틸/그린 (별이 있는 배경)
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
               ),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+            child: Stack(
+              alignment: Alignment.center,
               children: [
-                Icon(icon, color: Colors.white, size: 32),
-                const SizedBox(height: 8),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+                // 별 배경 효과
+                CustomPaint(size: Size.infinite, painter: _StarFieldPainter()),
+                // 타로 카드를 든 손 이미지 (플레이스홀더)
+                Container(
+                  width: 140,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD4AF37), // 골드
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFFFFD700), // 밝은 골드
+                      width: 3,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFFFD700).withOpacity(0.6),
+                        blurRadius: 30,
+                        spreadRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD4AF37),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.wb_sunny,
+                          color: Color(0xFFFFD700),
+                          size: 40,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'CARD',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                      const Text(
+                        'ARCANUM',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRecentTarotCard({
-    required String title,
-    required String description,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
-      ),
-      child: Row(
-        children: [
-          // 썸네일
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade700,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              Icons.auto_awesome,
-              color: Colors.white.withOpacity(0.5),
-              size: 30,
-            ),
-          ),
-          const SizedBox(width: 16),
-          // 제목과 설명
-          Expanded(
-            child: Column(
+          // 텍스트 및 버튼 영역 (하단)
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Pull of the Day',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Draw your daily card for guidance and insight.',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.7),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  description,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
-                    fontSize: 14,
+                const SizedBox(width: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFE91E63), Color(0xFF9C27B0)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Text(
+                    'Draw ...',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryGrid(BuildContext context) {
+    final categories = [
+      {
+        'icon': Icons.wb_sunny_outlined,
+        'title': "Today's Fortune",
+        'description': "What will today bring?",
+      },
+      {
+        'icon': Icons.favorite_outline,
+        'title': 'Love',
+        'description': 'Is romance in the cards?',
+      },
+      {
+        'icon': Icons.attach_money_outlined,
+        'title': 'Money',
+        'description': 'Cha-ching or cha-sad?',
+      },
+      {
+        'icon': Icons.people_outline,
+        'title': 'Relationships',
+        'description': 'Friends, family, frenemies?',
+      },
+      {
+        'icon': Icons.help_outline,
+        'title': 'Self-discovery',
+        'description': 'Who am I, really?',
+      },
+      {
+        'icon': Icons.school_outlined,
+        'title': 'Exams/Career',
+        'description': 'Study hard or hardly studying?',
+      },
+    ];
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 0.85,
+      ),
+      itemCount: categories.length,
+      itemBuilder: (context, index) {
+        final category = categories[index];
+        return _buildCategoryCard(
+          icon: category['icon'] as IconData,
+          title: category['title'] as String,
+          description: category['description'] as String,
+        );
+      },
+    );
+  }
+
+  Widget _buildCategoryCard({
+    required IconData icon,
+    required String title,
+    required String description,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => SpreadSelectScreen(categoryTitle: title),
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2D1B4E), // 다크 퍼플
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: Colors.white, size: 28),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Expanded(
+              child: Text(
+                description,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.7),
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-// 배경 마법 광원 효과를 그리는 CustomPainter
-class _MagicLightPainter extends CustomPainter {
-  final double animationX;
-  final double animationY;
-  final double screenWidth;
-  final double screenHeight;
-
-  _MagicLightPainter({
-    required this.animationX,
-    required this.animationY,
-    required this.screenWidth,
-    required this.screenHeight,
-  });
-
+// 별 배경 효과를 그리는 CustomPainter
+class _StarFieldPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    // 화면 경계 내에서 움직이도록 계산
-    // 여러 주기와 진폭을 조합하여 불규칙한 경로 생성
-
-    // X 위치: 여러 주기 파형을 조합
-    final x1 = math.sin(animationX * 2 * math.pi);
-    final x2 = math.cos(animationX * 3.5 * math.pi);
-    final x3 = math.sin(animationX * 1.7 * math.pi);
-    final lightX =
-        screenWidth * 0.3 +
-        (screenWidth * 0.4) * (0.4 * x1 + 0.3 * x2 + 0.3 * x3 + 1.0) / 2.0;
-
-    // Y 위치: 다른 주기와 진폭으로 움직임
-    final y1 = math.cos(animationY * 2.3 * math.pi);
-    final y2 = math.sin(animationY * 1.8 * math.pi);
-    final y3 = math.cos(animationY * 3.2 * math.pi);
-    final lightY =
-        screenHeight * 0.2 +
-        (screenHeight * 0.6) * (0.35 * y1 + 0.35 * y2 + 0.3 * y3 + 1.0) / 2.0;
-
-    // 화면 경계 체크
-    final clampedX = lightX.clamp(100.0, screenWidth - 100.0);
-    final clampedY = lightY.clamp(100.0, screenHeight - 100.0);
-
-    // 마법 광원 그리기
-    _drawMagicLight(canvas, Offset(clampedX, clampedY), 280.0);
-  }
-
-  void _drawMagicLight(Canvas canvas, Offset center, double radius) {
-    // 마법적인 보라색 계열 그라데이션
     final paint = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          const Color(0x506B46C1), // 보라색 (중앙, 더 진하게)
-          const Color(0x305938B0), // 더 진한 보라색
-          const Color(0x20409ED8), // 파란색 계열
-          Colors.transparent,
-        ],
-        stops: const [0.0, 0.25, 0.5, 1.0],
-      ).createShader(Rect.fromCircle(center: center, radius: radius))
-      ..blendMode = BlendMode.plus;
+      ..color = Colors.white.withOpacity(0.8)
+      ..style = PaintingStyle.fill;
 
-    canvas.drawCircle(center, radius, paint);
-
-    // 내부 코어 효과 (더 밝은 부분)
-    final corePaint = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          const Color(0x408B7FD6), // 밝은 보라색
-          const Color(0x206B46C1), // 보라색
-          Colors.transparent,
-        ],
-        stops: const [0.0, 0.4, 1.0],
-      ).createShader(Rect.fromCircle(center: center, radius: radius * 0.5))
-      ..blendMode = BlendMode.plus;
-
-    canvas.drawCircle(center, radius * 0.5, corePaint);
+    final random = math.Random(42); // 고정된 시드로 일관된 별 배치
+    for (int i = 0; i < 50; i++) {
+      final x = random.nextDouble() * size.width;
+      final y = random.nextDouble() * size.height;
+      final radius = random.nextDouble() * 2 + 0.5;
+      canvas.drawCircle(Offset(x, y), radius, paint);
+    }
   }
 
   @override
-  bool shouldRepaint(_MagicLightPainter oldDelegate) {
-    return oldDelegate.animationX != animationX ||
-        oldDelegate.animationY != animationY;
-  }
+  bool shouldRepaint(_StarFieldPainter oldDelegate) => false;
 }
