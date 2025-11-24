@@ -4,7 +4,7 @@ import 'package:taro/screen/home/home_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:taro/screen/home/widget/tarot_history_sheet.dart';
+import 'package:taro/screen/home/widget/tarot_history_widget.dart';
 
 final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();

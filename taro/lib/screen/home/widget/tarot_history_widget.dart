@@ -5,63 +5,57 @@ class TarotHistoryWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF2D1B4E),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
+    return Scaffold(
+      backgroundColor: const Color(0xFF2D1B4E),
+      body: GestureDetector(
+        onHorizontalDragEnd: (details) {
+          // 오른쪽으로 스와이프 (뒤로가기)
+          if (details.primaryVelocity! > 0) {
+            Navigator.pop(context);
+          }
+        },
+        child: Column(
+          children: [
+            // 헤더
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Reading History',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // 히스토리 리스트
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                itemCount: 10,
+                itemBuilder: (context, index) {
+                  return _buildHistoryItem(
+                    date: 'November ${24 - index}, 2025',
+                    question: 'What does the future hold for my career?',
+                    card: 'The Fool',
+                    isReversed: index % 3 == 0,
+                  );
+                },
+              ),
+            ),
+          ],
         ),
-      ),
-      child: Column(
-        children: [
-          // 드래그 핸들
-          Container(
-            margin: const EdgeInsets.only(top: 12),
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          // 헤더
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () => Navigator.pop(context),
-                ),
-                const SizedBox(width: 8),
-                const Text(
-                  'Reading History',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // 히스토리 리스트
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              itemCount: 10, // TODO: 실제 히스토리 데이터로 교체
-              itemBuilder: (context, index) {
-                return _buildHistoryItem(
-                  date: 'November ${24 - index}, 2025',
-                  question: 'What does the future hold for my career?',
-                  card: 'The Fool',
-                  isReversed: index % 3 == 0,
-                );
-              },
-            ),
-          ),
-        ],
       ),
     );
   }

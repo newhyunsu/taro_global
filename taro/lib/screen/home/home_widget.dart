@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:taro/router/go_router.dart';
 import 'package:taro/screen/home/widget/magic_light.dart';
-import 'package:taro/screen/home/widget/tarot_history_sheet.dart';
+import 'package:taro/screen/home/widget/tarot_history_widget.dart';
 import 'package:taro/screen/home/widget/tarot_menu_drawer.dart';
 
 class HomeWidget extends StatefulWidget {
