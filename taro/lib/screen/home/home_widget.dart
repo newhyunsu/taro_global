@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:taro/router/go_router.dart';
 import 'package:taro/screen/home/widget/magic_light.dart';
 import 'package:taro/screen/home/widget/tarot_history_sheet.dart';
 import 'package:taro/screen/home/widget/tarot_menu_drawer.dart';
@@ -20,6 +21,7 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
   late Animation<double> _cardGlowAnimation;
 
   final TextEditingController _questionController = TextEditingController();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -64,11 +66,16 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  void _openHistory() {
+    goRouter.push('/history');
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
 
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: const Color(0xFF1A0B2E),
       appBar: AppBar(
         backgroundColor: const Color(0xFF2D1B4E),
@@ -77,7 +84,7 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu, color: Colors.white),
             onPressed: () {
-              Scaffold.of(context).openDrawer();
+              _scaffoldKey.currentState?.openDrawer();
             },
           ),
         ),
@@ -93,147 +100,152 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
         actions: [
           IconButton(
             icon: const Icon(Icons.history, color: Colors.white),
-            onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (context) => const TarotHistorySheet(),
-              );
-            },
+            onPressed: _openHistory,
           ),
         ],
       ),
       drawer: const TarotMenuDrawer(),
-      body: Stack(
-        children: [
-          // 배경 마법 광원 효과
-          AnimatedBuilder(
-            animation: _magicLightController,
-            builder: (context, child) {
-              return CustomPaint(
-                size: screenSize,
-                painter: MagicLightPainter(
-                  animationX: _magicAnimationX.value,
-                  animationY: _magicAnimationY.value,
-                  screenWidth: screenSize.width,
-                  screenHeight: screenSize.height,
-                ),
-              );
-            },
-          ),
-          // 메인 컨텐츠
-          SafeArea(
-            child: Column(
-              children: [
-                // 타로 카드 영역
-                Expanded(
-                  child: Center(
+      body: GestureDetector(
+        onHorizontalDragEnd: (details) {
+          // 오른쪽으로 스와이프 (왼쪽 메뉴 열기)
+          if (details.primaryVelocity! > 0) {
+            _scaffoldKey.currentState?.openDrawer();
+          }
+          // 왼쪽으로 스와이프 (히스토리 열기)
+          else if (details.primaryVelocity! < 0) {
+            _openHistory();
+          }
+        },
+        child: Stack(
+          children: [
+            // 배경 마법 광원 효과
+            AnimatedBuilder(
+              animation: _magicLightController,
+              builder: (context, child) {
+                return CustomPaint(
+                  size: screenSize,
+                  painter: MagicLightPainter(
+                    animationX: _magicAnimationX.value,
+                    animationY: _magicAnimationY.value,
+                    screenWidth: screenSize.width,
+                    screenHeight: screenSize.height,
+                  ),
+                );
+              },
+            ),
+            // 메인 컨텐츠
+            SafeArea(
+              child: Column(
+                children: [
+                  // 타로 카드 영역
+                  Expanded(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // 타로 카드
+                          // 안내 텍스트
+                          const Text(
+                            'Awaiting Your Question',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 40),
+                            child: Text(
+                              'Focus on your question and let the cards guide you. Your answer awaits.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.7),
+                                fontSize: 16,
+                                height: 1.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // 하단 입력 영역
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2D1B4E).withOpacity(0.9),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(30),
+                        topRight: Radius.circular(30),
+                      ),
+                    ),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        // 타로 카드
-                        // 안내 텍스트
-                        const Text(
-                          'Awaiting Your Question',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
+                        // 질문 입력 필드
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1A0B2E),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: TextField(
+                            controller: _questionController,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: 'Type your question here...',
+                              hintStyle: TextStyle(
+                                color: Colors.white.withOpacity(0.5),
+                                fontSize: 16,
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                            maxLines: 3,
+                            minLines: 1,
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 40),
-                          child: Text(
-                            'Focus on your question and let the cards guide you. Your answer awaits.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.7),
-                              fontSize: 16,
-                              height: 1.5,
+                        const SizedBox(height: 16),
+                        // Draw a Card 버튼
+                        SizedBox(
+                          width: double.infinity,
+                          height: 56,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              // TODO: 카드 뽑기 로직
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFFFD700),
+                              foregroundColor: const Color(0xFF1A0B2E),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: const Text(
+                              'Draw a Card',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                ),
-                // 하단 입력 영역
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2D1B4E).withOpacity(0.9),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30),
-                    ),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // 질문 입력 필드
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 16,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1A0B2E),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: TextField(
-                          controller: _questionController,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: 'Type your question here...',
-                            hintStyle: TextStyle(
-                              color: Colors.white.withOpacity(0.5),
-                              fontSize: 16,
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.zero,
-                          ),
-                          maxLines: 3,
-                          minLines: 1,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      // Draw a Card 버튼
-                      SizedBox(
-                        width: double.infinity,
-                        height: 56,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // TODO: 카드 뽑기 로직
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFFD700),
-                            foregroundColor: const Color(0xFF1A0B2E),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: const Text(
-                            'Draw a Card',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

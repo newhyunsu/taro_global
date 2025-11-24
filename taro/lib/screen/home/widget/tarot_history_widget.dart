@@ -1,76 +1,68 @@
 import 'package:flutter/material.dart';
 
-class TarotHistorySheet extends StatelessWidget {
-  const TarotHistorySheet({super.key});
+class TarotHistoryWidget extends StatelessWidget {
+  const TarotHistoryWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
-      initialChildSize: 0.9,
-      minChildSize: 0.5,
-      maxChildSize: 0.95,
-      builder: (context, scrollController) {
-        return Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFF2D1B4E),
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(30),
-              topRight: Radius.circular(30),
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color(0xFF2D1B4E),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
+        ),
+      ),
+      child: Column(
+        children: [
+          // 드래그 핸들
+          Container(
+            margin: const EdgeInsets.only(top: 12),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(2),
             ),
           ),
-          child: Column(
-            children: [
-              // 드래그 핸들
-              Container(
-                margin: const EdgeInsets.only(top: 12),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(2),
+          // 헤더
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
                 ),
-              ),
-              // 헤더
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Reading History',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ],
+                const SizedBox(width: 8),
+                const Text(
+                  'Reading History',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              // 히스토리 리스트
-              Expanded(
-                child: ListView.builder(
-                  controller: scrollController,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  itemCount: 10, // TODO: 실제 히스토리 데이터로 교체
-                  itemBuilder: (context, index) {
-                    return _buildHistoryItem(
-                      date: 'November ${24 - index}, 2025',
-                      question: 'What does the future hold for my career?',
-                      card: 'The Fool',
-                      isReversed: index % 3 == 0,
-                    );
-                  },
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-        );
-      },
+          // 히스토리 리스트
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              itemCount: 10, // TODO: 실제 히스토리 데이터로 교체
+              itemBuilder: (context, index) {
+                return _buildHistoryItem(
+                  date: 'November ${24 - index}, 2025',
+                  question: 'What does the future hold for my career?',
+                  card: 'The Fool',
+                  isReversed: index % 3 == 0,
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 

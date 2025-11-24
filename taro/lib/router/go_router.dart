@@ -4,6 +4,7 @@ import 'package:taro/screen/home/home_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:taro/screen/home/widget/tarot_history_sheet.dart';
 
 final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
@@ -17,6 +18,16 @@ final GoRouter goRouter = GoRouter(
       builder: (context, state) {
         // return const MainTabbarWidget(); // 탭 또는 공통 레이아웃
         return const HomeWidget();
+      },
+    ),
+    GoRoute(
+      path: '/history',
+      pageBuilder: (context, state) {
+        return CupertinoPage(
+          key: state.pageKey,
+          // edgeWidth: 200, // 화면 왼쪽에서 200픽셀까지 제스처 감지 영역
+          child: TarotHistoryWidget(),
+        );
       },
     ),
     GoRoute(
