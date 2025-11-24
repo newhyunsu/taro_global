@@ -1,6 +1,6 @@
 import 'package:taro/common/util/google_analytics_wrapper.dart';
 import 'package:taro/common/webview/webview_widget.dart';
-import 'package:taro/screen/main/main_screen.dart';
+import 'package:taro/screen/home/home_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -15,7 +15,8 @@ final GoRouter goRouter = GoRouter(
     GoRoute(
       path: '/',
       builder: (context, state) {
-        return const MainTabbarWidget(); // 탭 또는 공통 레이아웃
+        // return const MainTabbarWidget(); // 탭 또는 공통 레이아웃
+        return const HomeWidget();
       },
     ),
     GoRoute(

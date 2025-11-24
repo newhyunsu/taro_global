@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:taro/screen/home/widget/magic_light.dart';
+import 'package:taro/screen/home/widget/tarot_history_sheet.dart';
+import 'package:taro/screen/home/widget/tarot_menu_drawer.dart';
 
 class HomeWidget extends StatefulWidget {
   const HomeWidget({super.key});
@@ -71,9 +73,13 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
       appBar: AppBar(
         backgroundColor: const Color(0xFF2D1B4E),
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.white),
-          onPressed: () {},
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu, color: Colors.white),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
         ),
         title: const Text(
           'Ask the Tarot',
@@ -87,10 +93,18 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
         actions: [
           IconButton(
             icon: const Icon(Icons.history, color: Colors.white),
-            onPressed: () {},
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) => const TarotHistorySheet(),
+              );
+            },
           ),
         ],
       ),
+      drawer: const TarotMenuDrawer(),
       body: Stack(
         children: [
           // 배경 마법 광원 효과
