@@ -1,18 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../provider/tarot_history_provider.dart';
+import 'tarot_history_item.dart';
 
-class TarotHistoryWidget extends StatelessWidget {
+class TarotHistoryWidget extends ConsumerStatefulWidget {
   const TarotHistoryWidget({super.key});
 
   @override
+  ConsumerState<TarotHistoryWidget> createState() => _TarotHistoryWidgetState();
+}
+
+class _TarotHistoryWidgetState extends ConsumerState<TarotHistoryWidget> {
+  double _dragStartX = 0;
+  double _dragUpdateX = 0;
+
+  @override
   Widget build(BuildContext context) {
+    final historyList = ref.watch(tarotHistoryProvider);
+
     return Scaffold(
       backgroundColor: const Color(0xFF2D1B4E),
       body: GestureDetector(
+        onHorizontalDragStart: (details) {
+          _dragStartX = details.globalPosition.dx;
+        },
+        onHorizontalDragUpdate: (details) {
+          _dragUpdateX = details.globalPosition.dx;
+        },
         onHorizontalDragEnd: (details) {
-          // 오른쪽으로 스와이프 (뒤로가기)
-          if (details.primaryVelocity! > 0) {
-            Navigator.pop(context);
-          }
+          final dragDistance = _dragUpdateX - _dragStartX;
+          // 오른쪽으로 100px 이상 드래그하거나 빠른 속도로 스와이프
+          // if (dragDistance > 100 ||
+          //     (details.primaryVelocity != null &&
+          //         details.primaryVelocity! > 500)) {
+          Navigator.pop(context);
+          // }
         },
         child: Column(
           children: [
@@ -35,24 +57,43 @@ class TarotHistoryWidget extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+                    const Spacer(),
+                    if (historyList.isNotEmpty)
+                      IconButton(
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          color: Colors.white,
+                        ),
+                        onPressed: () {
+                          _showClearHistoryDialog(context, ref);
+                        },
+                      ),
                   ],
                 ),
               ),
             ),
             // 히스토리 리스트
             Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                itemCount: 10,
-                itemBuilder: (context, index) {
-                  return _buildHistoryItem(
-                    date: 'November ${24 - index}, 2025',
-                    question: 'What does the future hold for my career?',
-                    card: 'The Fool',
-                    isReversed: index % 3 == 0,
-                  );
-                },
-              ),
+              child: historyList.isEmpty
+                  ? _buildEmptyState()
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      itemCount: historyList.length,
+                      itemBuilder: (context, index) {
+                        final reading = historyList[index];
+                        return TarotHistoryItem(
+                          reading: reading,
+                          onTap: () {
+                            // TODO: 상세 페이지로 이동
+                          },
+                          onDelete: () {
+                            ref
+                                .read(tarotHistoryProvider.notifier)
+                                .removeReading(reading.id);
+                          },
+                        );
+                      },
+                    ),
             ),
           ],
         ),
@@ -60,105 +101,57 @@ class TarotHistoryWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildHistoryItem({
-    required String date,
-    required String question,
-    required String card,
-    required bool isReversed,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A0B2E),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
-      ),
+  Widget _buildEmptyState() {
+    return Center(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // 날짜
-          Row(
-            children: [
-              Icon(
-                Icons.calendar_today,
-                size: 14,
-                color: Colors.white.withOpacity(0.5),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                date,
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.5),
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          // 질문
+          Icon(Icons.history, size: 64, color: Colors.white.withOpacity(0.3)),
+          const SizedBox(height: 16),
           Text(
-            question,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
+            'No readings yet',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.5),
+              fontSize: 18,
             ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 12),
-          // 카드 정보
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFD700).withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFFFFD700), width: 1),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.auto_awesome,
-                      size: 16,
-                      color: Color(0xFFFFD700),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      card,
-                      style: const TextStyle(
-                        color: Color(0xFFFFD700),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (isReversed) ...[
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: const Text(
-                    'Reversed',
-                    style: TextStyle(color: Colors.red, fontSize: 12),
-                  ),
-                ),
-              ],
-            ],
+          const SizedBox(height: 8),
+          Text(
+            'Your tarot reading history will appear here',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.3),
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showClearHistoryDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF2D1B4E),
+        title: const Text(
+          'Clear History',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: const Text(
+          'Are you sure you want to clear all reading history?',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              ref.read(tarotHistoryProvider.notifier).clearHistory();
+              Navigator.pop(context);
+            },
+            child: const Text('Clear', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
