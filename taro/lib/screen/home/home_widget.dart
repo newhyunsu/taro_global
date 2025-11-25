@@ -5,6 +5,7 @@ import 'package:taro/router/go_router.dart';
 import 'package:taro/screen/home/widget/magic_light.dart';
 import 'package:taro/screen/home/widget/tarot_history_widget.dart';
 import 'package:taro/screen/home/widget/tarot_menu_drawer.dart';
+import 'package:taro/i18n/strings.g.dart';
 
 class HomeWidget extends StatefulWidget {
   const HomeWidget({super.key});
@@ -73,6 +74,7 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
+    final t = Translations.of(context);
 
     return Scaffold(
       key: _scaffoldKey,
@@ -88,9 +90,9 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
             },
           ),
         ),
-        title: const Text(
-          'Ask the Tarot',
-          style: TextStyle(
+        title: Text(
+          t.home.title,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 20,
             fontWeight: FontWeight.w600,
@@ -145,9 +147,9 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
                         children: [
                           // 타로 카드
                           // 안내 텍스트
-                          const Text(
-                            'Awaiting Your Question',
-                            style: TextStyle(
+                          Text(
+                            t.home.awaitingQuestion,
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -157,7 +159,7 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 40),
                             child: Text(
-                              'Focus on your question and let the cards guide you. Your answer awaits.',
+                              t.home.focusMessage,
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: Colors.white.withOpacity(0.7),
@@ -200,7 +202,7 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
                               fontSize: 16,
                             ),
                             decoration: InputDecoration(
-                              hintText: 'Type your question here...',
+                              hintText: t.home.questionHint,
                               hintStyle: TextStyle(
                                 color: Colors.white.withOpacity(0.5),
                                 fontSize: 16,
@@ -229,9 +231,9 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
                               ),
                               elevation: 0,
                             ),
-                            child: const Text(
-                              'Draw a Card',
-                              style: TextStyle(
+                            child: Text(
+                              t.home.drawCard,
+                              style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),

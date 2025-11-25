@@ -91,6 +91,9 @@ dependencies:
   path_provider: ^2.1.5
   path: ^1.8.3
 
+  slang: ^4.11.0
+  slang_flutter: ^4.11.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -110,6 +113,7 @@ dev_dependencies:
   # For generating type-safe APIs for Drift
   drift_dev: ^2.28.1
   build_runner: ^2.7.0
+  slang_build_runner: ^4.11.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -127,6 +131,7 @@ flutter:
     - assets/images/
     - assets/lottie/
     - assets/icon/
+    - assets/i18n/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

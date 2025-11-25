@@ -30,11 +30,11 @@ class _TarotHistoryWidgetState extends ConsumerState<TarotHistoryWidget> {
         onHorizontalDragEnd: (details) {
           final dragDistance = _dragUpdateX - _dragStartX;
           // 오른쪽으로 100px 이상 드래그하거나 빠른 속도로 스와이프
-          // if (dragDistance > 100 ||
-          //     (details.primaryVelocity != null &&
-          //         details.primaryVelocity! > 500)) {
-          Navigator.pop(context);
-          // }
+          if (dragDistance > 100 ||
+              (details.primaryVelocity != null &&
+                  details.primaryVelocity! > 500)) {
+            Navigator.pop(context);
+          }
         },
         child: Column(
           children: [

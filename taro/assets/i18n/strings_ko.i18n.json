@@ -1,0 +1,29 @@
+{
+  "appName": "타로 물어보기",
+  "home": {
+    "title": "타로 물어보기",
+    "awaitingQuestion": "질문을 기다리고 있습니다",
+    "focusMessage": "질문에 집중하고 카드가 당신을 안내하도록 하세요. 답변이 기다리고 있습니다.",
+    "questionHint": "여기에 질문을 입력하세요...",
+    "drawCard": "카드 뽑기"
+  },
+  "history": {
+    "title": "리딩 기록",
+    "empty": {
+      "title": "아직 리딩 기록이 없습니다",
+      "message": "타로 리딩 기록이 여기에 표시됩니다"
+    },
+    "clearDialog": {
+      "title": "기록 삭제",
+      "message": "모든 리딩 기록을 삭제하시겠습니까?",
+      "cancel": "취소",
+      "confirm": "삭제"
+    },
+    "reversed": "역방향"
+  },
+  "menu": {
+    "settings": "설정",
+    "about": "정보",
+    "help": "도움말"
+  }
+}

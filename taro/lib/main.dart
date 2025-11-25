@@ -14,7 +14,9 @@ import 'package:app_links/app_links.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:taro/i18n/strings.g.dart';
 import 'package:toastification/toastification.dart';
 
 final appStorageProvider = Provider<AppStorage>((ref) {
@@ -39,11 +41,12 @@ void main() async {
       .catchError((e) {
         AppLogger.i("❌ 등록 중 에러: $e");
       });
+  LocaleSettings.useDeviceLocale(); // 기기 언어 사용
   runApp(
     ProviderScope(
       // overrides: [appStorageProvider, appDatabaseProvider, apiService],
       overrides: [appStorageProvider, apiService],
-      child: const App(),
+      child: TranslationProvider(child: const App()),
     ),
   );
 }
@@ -125,28 +128,15 @@ class _AppState extends ConsumerState<App> {
   Widget build(BuildContext context) {
     return ToastificationWrapper(
       child: MaterialApp.router(
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-          scaffoldBackgroundColor: kPrimaryColor,
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.black,
-          ),
-        ),
-        darkTheme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.teal,
-            brightness: Brightness.dark,
-          ),
-          scaffoldBackgroundColor: kPrimaryColor,
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Colors.black,
-            foregroundColor: Colors.white,
-          ),
-        ),
-        themeMode: ThemeMode.light,
+        title: 'Tarot App',
+        theme: ThemeData(primarySwatch: Colors.purple, useMaterial3: true),
+        locale: TranslationProvider.of(context).flutterLocale,
+        supportedLocales: AppLocaleUtils.supportedLocales,
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
         routerConfig: goRouter,
         builder: (context, child) {
           return SplashScreen(child: child);

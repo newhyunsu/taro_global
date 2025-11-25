@@ -1,0 +1,29 @@
+{
+    "appName": "Ask the Tarot",
+    "home": {
+        "title": "Ask the Tarot",
+        "awaitingQuestion": "Awaiting Your Question",
+        "focusMessage": "Focus on your question and let the cards guide you. Your answer awaits.",
+        "questionHint": "Type your question here...",
+        "drawCard": "Draw a Card"
+    },
+    "history": {
+        "title": "Reading History",
+        "empty": {
+            "title": "No readings yet",
+            "message": "Your tarot reading history will appear here"
+        },
+        "clearDialog": {
+            "title": "Clear History",
+            "message": "Are you sure you want to clear all reading history?",
+            "cancel": "Cancel",
+            "confirm": "Clear"
+        },
+        "reversed": "Reversed"
+    },
+    "menu": {
+        "settings": "Settings",
+        "about": "About",
+        "help": "Help"
+    }
+}
