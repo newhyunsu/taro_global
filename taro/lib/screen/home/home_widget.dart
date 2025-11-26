@@ -1,27 +1,31 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:taro/router/go_router.dart';
 import 'package:taro/screen/home/widget/magic_light.dart';
-import 'package:taro/screen/home/widget/tarot_history_widget.dart';
 import 'package:taro/screen/home/widget/tarot_menu_drawer.dart';
+import 'package:taro/screen/home/widget/home_header_widget.dart';
+import 'package:taro/screen/home/widget/question_input_widget.dart';
+import 'package:taro/screen/home/widget/draw_card_button.dart';
 import 'package:taro/i18n/strings.g.dart';
+import 'package:taro/provider/animation_provider.dart';
 
-class HomeWidget extends StatefulWidget {
+class HomeWidget extends ConsumerStatefulWidget {
   const HomeWidget({super.key});
 
   @override
-  State<HomeWidget> createState() => _HomeWidgetState();
+  ConsumerState<HomeWidget> createState() => _HomeWidgetState();
 }
 
-class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
+class _HomeWidgetState extends ConsumerState<HomeWidget>
+    with TickerProviderStateMixin {
   late AnimationController _magicLightController;
   late Animation<double> _magicAnimationX;
   late Animation<double> _magicAnimationY;
   late AnimationController _cardAnimationController;
   late Animation<double> _cardGlowAnimation;
 
-  final TextEditingController _questionController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -57,13 +61,25 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
         curve: Curves.easeInOut,
       ),
     );
+
+    // Provider에 애니메이션 값 업데이트
+    _magicLightController.addListener(() {
+      ref
+          .read(animationProvider.notifier)
+          .updateMagicAnimation(_magicAnimationX.value, _magicAnimationY.value);
+    });
+
+    _cardAnimationController.addListener(() {
+      ref
+          .read(animationProvider.notifier)
+          .updateCardGlow(_cardGlowAnimation.value);
+    });
   }
 
   @override
   void dispose() {
     _magicLightController.dispose();
     _cardAnimationController.dispose();
-    _questionController.dispose();
     super.dispose();
   }
 
@@ -75,6 +91,7 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     final t = Translations.of(context);
+    final animationState = ref.watch(animationProvider);
 
     return Scaffold(
       key: _scaffoldKey,
@@ -121,57 +138,21 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
         child: Stack(
           children: [
             // 배경 마법 광원 효과
-            AnimatedBuilder(
-              animation: _magicLightController,
-              builder: (context, child) {
-                return CustomPaint(
-                  size: screenSize,
-                  painter: MagicLightPainter(
-                    animationX: _magicAnimationX.value,
-                    animationY: _magicAnimationY.value,
-                    screenWidth: screenSize.width,
-                    screenHeight: screenSize.height,
-                  ),
-                );
-              },
+            CustomPaint(
+              size: screenSize,
+              painter: MagicLightPainter(
+                animationX: animationState.magicAnimationX,
+                animationY: animationState.magicAnimationY,
+                screenWidth: screenSize.width,
+                screenHeight: screenSize.height,
+              ),
             ),
             // 메인 컨텐츠
             SafeArea(
               child: Column(
                 children: [
                   // 타로 카드 영역
-                  Expanded(
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // 타로 카드
-                          // 안내 텍스트
-                          Text(
-                            t.home.awaitingQuestion,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 40),
-                            child: Text(
-                              t.home.focusMessage,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.7),
-                                fontSize: 16,
-                                height: 1.5,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  const Expanded(child: HomeHeaderWidget()),
                   // 하단 입력 영역
                   Container(
                     padding: const EdgeInsets.all(20),
@@ -182,64 +163,14 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
                         topRight: Radius.circular(30),
                       ),
                     ),
-                    child: Column(
+                    child: const Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // 질문 입력 필드
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 16,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1A0B2E),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: TextField(
-                            controller: _questionController,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                            ),
-                            decoration: InputDecoration(
-                              hintText: t.home.questionHint,
-                              hintStyle: TextStyle(
-                                color: Colors.white.withOpacity(0.5),
-                                fontSize: 16,
-                              ),
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.zero,
-                            ),
-                            maxLines: 3,
-                            minLines: 1,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
+                        QuestionInputWidget(),
+                        SizedBox(height: 16),
                         // Draw a Card 버튼
-                        SizedBox(
-                          width: double.infinity,
-                          height: 56,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              // TODO: 카드 뽑기 로직
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFFFD700),
-                              foregroundColor: const Color(0xFF1A0B2E),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              elevation: 0,
-                            ),
-                            child: Text(
-                              t.home.drawCard,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
+                        DrawCardButton(),
                       ],
                     ),
                   ),
