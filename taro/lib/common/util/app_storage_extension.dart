@@ -15,6 +15,7 @@ enum AppStorageKey {
   useFilter('use_filter'),
   siteSelector('siteSelector'),
   hasReviewed('hasReviewed'),
+  languagePreference('languagePreference'),
 
   //자동로그인
   idToken('id_token'),
